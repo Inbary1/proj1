@@ -1,9 +1,10 @@
-#username - complete info
-#id1      - complete info 
-#name1    - complete info 
-#id2      - complete info
-#name2    - complete info  
+#username - saarmolina
 
+#id1      - 206968216git
+#name1    - Saar Molina
+
+#id2      - 318672680
+#name2    - Inbar Yakov 
 
 
 """A class represnting a node in an AVL tree"""
@@ -22,15 +23,17 @@ class AVLNode(object):
 		self.right = None
 		self.parent = None
 		self.height = -1
-		
+		self.bf = 0 
+				
 
 	"""returns the left child
 	@rtype: AVLNode
 	@returns: the left child of self, None if there is no left child (if self is virtual)
 	"""
 	def get_left(self):
+		if self.is_real_node:
+			return self.left
 		return None
-
 
 
 	"""returns the right child
@@ -39,6 +42,8 @@ class AVLNode(object):
 	@returns: the right child of self, None if there is no right child (if self is virtual)
 	"""
 	def get_right(self):
+		if self.is_real_node:
+			return self.right
 		return None
 
 
@@ -48,7 +53,7 @@ class AVLNode(object):
 	@returns: the parent of self, None if there is no parent
 	"""
 	def get_parent(self):
-		return None
+		return self.parent
 
 
 	"""returns the key
@@ -57,7 +62,7 @@ class AVLNode(object):
 	@returns: the key of self, None if the node is virtual
 	"""
 	def get_key(self):
-		return None
+		return self.key
 
 
 	"""returns the value
@@ -66,7 +71,7 @@ class AVLNode(object):
 	@returns: the value of self, None if the node is virtual
 	"""
 	def get_value(self):
-		return None
+		return self.value
 
 
 	"""returns the height
@@ -75,8 +80,17 @@ class AVLNode(object):
 	@returns: the height of self, -1 if the node is virtual
 	"""
 	def get_height(self):
-		return -1
+		return self.height
 
+
+	"""returns the bf 
+
+	@rtype: int
+	@returns: the bf of self
+	"""
+
+	def get_bf(self):
+		return self.bf
 
 	"""sets left child
 
@@ -84,7 +98,7 @@ class AVLNode(object):
 	@param node: a node
 	"""
 	def set_left(self, node):
-		return None
+		self.left = node
 
 
 	"""sets right child
@@ -93,7 +107,7 @@ class AVLNode(object):
 	@param node: a node
 	"""
 	def set_right(self, node):
-		return None
+		self.right = node
 
 
 	"""sets parent
@@ -102,7 +116,7 @@ class AVLNode(object):
 	@param node: a node
 	"""
 	def set_parent(self, node):
-		return None
+		self.parent = node
 
 
 	"""sets key
@@ -111,7 +125,7 @@ class AVLNode(object):
 	@param key: key
 	"""
 	def set_key(self, key):
-		return None
+		self.key = key
 
 
 	"""sets value
@@ -120,7 +134,7 @@ class AVLNode(object):
 	@param value: data
 	"""
 	def set_value(self, value):
-		return None
+		self.value = value
 
 
 	"""sets the height of the node
@@ -129,8 +143,16 @@ class AVLNode(object):
 	@param h: the height
 	"""
 	def set_height(self, h):
-		return None
+		self.height = h
 
+
+	"""sets the height of the node
+
+	@type h: int
+	@param h: the height
+	"""
+	def set_height(self, h):
+		self.height = h
 
 	"""returns whether self is not a virtual node 
 
@@ -138,7 +160,9 @@ class AVLNode(object):
 	@returns: False if self is a virtual node, True otherwise.
 	"""
 	def is_real_node(self):
-		return False
+
+		return self.key is not None
+
 
 
 
@@ -156,6 +180,8 @@ class AVLTree(object):
 		self.root = None
 		# add your fields here
 
+		self.tree_size = 0 
+
 
 
 	"""searches for a AVLNode in the dictionary corresponding to the key
@@ -165,8 +191,26 @@ class AVLTree(object):
 	@rtype: AVLNode
 	@returns: the AVLNode corresponding to key or None if key is not found.
 	"""
+
 	def search(self, key):
+
+		node = self.root
+		
+		while node.is_real_node():
+
+			if key == node.get_key():
+				return node
+			
+			elif key < node.get_key():
+				node = node.get_left()
+			
+			else:
+				node = node.get_right()
+
 		return None
+	
+	
+	
 
 
 	"""inserts val at position i in the dictionary
@@ -179,6 +223,7 @@ class AVLTree(object):
 	@rtype: int
 	@returns: the number of rebalancing operation due to AVL rebalancing
 	"""
+
 	def insert(self, key, val):
 		return -1
 
@@ -209,7 +254,7 @@ class AVLTree(object):
 	@returns: the number of items in dictionary 
 	"""
 	def size(self):
-		return -1	
+		return self.tree_size	
 
 	
 	"""splits the dictionary at the i'th index
@@ -248,4 +293,4 @@ class AVLTree(object):
 	@returns: the root, None if the dictionary is empty
 	"""
 	def get_root(self):
-		return None
+		return self.root

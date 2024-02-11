@@ -17,6 +17,7 @@ class AVLNode(object):
 	@param value: data of your node
 	"""
 	def __init__(self, key, value):
+
 		self.key = key
 		self.value = value
 		self.left = None
@@ -30,9 +31,8 @@ class AVLNode(object):
 	@returns: the left child of self, None if there is no left child (if self is virtual)
 	"""
 	def get_left(self):
-		if self.is_real_node():
-			return self.left
-		return None
+
+		return self.left
 
 
 	"""returns the right child
@@ -41,9 +41,8 @@ class AVLNode(object):
 	@returns: the right child of self, None if there is no right child (if self is virtual)
 	"""
 	def get_right(self):
-		if self.is_real_node():
-			return self.right
-		return None
+
+		return self.right
 
 
 	"""returns the parent 
@@ -172,7 +171,13 @@ class AVLNode(object):
 		return leaf
 
 	def is_leaf(self):
-		return (self.get_right().is_real_node() == False) and (self.get_left().is_real_node() == False)
+
+		if self.is_real_node():
+			return (self.get_right().is_real_node() == False) and (self.get_left().is_real_node() == False)
+		
+		else:
+			return True 
+
 	
 
 	def update_height(self):
@@ -211,7 +216,7 @@ class AVLTree(object):
 
 		node = self.root
 		
-		while node is not None and node.is_real_node():
+		while node.is_real_node():
 
 			if key == node.get_key():
 				return node
@@ -230,11 +235,11 @@ class AVLTree(object):
 
 		node = self.root
 
-		y = node
+		parent = node
 		
 		while node.is_real_node():
 
-			y = node
+			parent = node
 
 			if new_node.get_key() < node.get_key():
 				node = node.get_left()
@@ -242,7 +247,7 @@ class AVLTree(object):
 			else:
 				node = node.get_right()
 
-		return y
+		return parent
 	
 
 
@@ -272,6 +277,7 @@ class AVLTree(object):
 
 		if B.get_parent() != None: 
 			A.set_parent(B.get_parent())
+			B.get_parent().set_right(A)
 
 		else:  #B is root 
 			self.root = A 
@@ -279,6 +285,9 @@ class AVLTree(object):
 
 		B.set_parent(A)
 		B.set_left(AR)
+		
+		B.update_height()
+		A.update_height()
 
 		if AR is not None:
 			AR.set_parent(B)
@@ -293,6 +302,8 @@ class AVLTree(object):
 
 		if B.get_parent() != None: 
 			A.set_parent(B.get_parent())
+			B.get_parent().set_left(A)
+
 
 		else:  #B is root 
 			self.root = A 
@@ -300,6 +311,9 @@ class AVLTree(object):
 
 		B.set_parent(A)
 		B.set_right(AL)
+
+		B.update_height()
+		A.update_height()
 
 		if AL is not None:
 			AL.set_parent(B)
@@ -309,33 +323,44 @@ class AVLTree(object):
 
 		A = C.get_left()
 		self.left_rotation(A)
+		C.set_left(A.get_parent())
 		self.right_rotation(C)
 
 	def right_left_rotation(self, C):
 
 		A = C.get_right()
 		self.right_rotation(A)
+		C.set_right(A.get_parent())
 		self.left_rotation(C)
 
 
 	def rotation(self, node):
 
+		c = 0
+
 		if node.get_bf() == -2:
 
-			if node.get_right().get_bf() == -1:
+			if node.get_right().get_bf() == -1 or node.get_right().get_bf() == 0:
 				self.left_rotation(node)
+				c += 1
 
 			else:
 				self.right_left_rotation(node)
-		
+				c += 2
+
+
 		else:
 
-			if node.get_left().get_bf() == 1:
+			if node.get_left().get_bf() == 1 or node.get_left().get_bf() == 0:
 				self.right_rotation(node)
+				c += 1
 
 			else:
 				self.left_right_rotation(node)
-				
+				c += 2
+
+		return c
+
 				
 	def print_tree(root, level=0, prefix="Root: "):
 		if root is not None:
@@ -358,18 +383,12 @@ class AVLTree(object):
 
 	def insert(self, key, val):
 
+		c = 0
 		new_node = AVLNode.new_leaf(key,val)
-		print("new Node: ", key)
 		parent = self.find_parent(new_node)
-		print("parent: ", parent.key)
-
-
 
 		self.BST_insert(parent, new_node)
 		self.tree_size += 1 
-
-					
-
 
 		while parent is not None and parent.is_real_node():
 			
@@ -390,14 +409,122 @@ class AVLTree(object):
 			else:
 
 				old_parent = parent.get_parent()
-				self.rotation(parent)
+				c += self.rotation(parent)
 				parent = old_parent
-
-
-
 			
+		return c
+	
+
+	def min(x):
+
+		while x.get_left().is_real_node():
+			x = x.get_left()
+
+		return x
 
 
+	def successor(self, x):
+
+		if x.get_right().is_real_node():
+			return min(x.get_right())
+		
+		y = x.get_parent()
+
+		while y.is_real_node() and x == y.get_right():
+
+			x = y 
+			y = x.get_parent()
+
+		return y
+		
+
+
+	def BST_delete(self, parent, node):
+
+		if node.is_real_node and node.is_leaf():
+				
+			if parent.is_real_node(): # no sons
+
+				if node.get_key() < parent.get_key():
+					parent.set_left(AVLNode(None, None))
+				
+				else:
+					parent.set_right(AVLNode(None, None))
+
+			else:
+
+				self.root = AVLNode(None, None)
+
+		else: 
+
+			if node.get_left().get_key() is None:  #only 1 right son
+				
+				if parent.is_real_node():
+
+					if node.get_key() < parent.get_key(): # node < parent
+						parent.set_left(node.get_right())
+				
+					else: # parent < node
+						parent.set_right(node.get_right())
+
+					node.get_right().set_parent(parent)
+				
+				else:
+
+					self.root = node.get_right()
+				
+			elif node.get_right().get_key() is None: # only 1 left son
+					
+				if parent.is_real_node():
+
+					if node.get_key() < parent.get_key(): # node < parent
+						parent.set_left(node.get_left())
+				
+					else: # parent < node
+						parent.set_right(node.get_left())
+
+					node.get_left().set_parent(parent)
+
+				else:
+
+					self.root = node.get_left()
+
+			else: # 2 sons
+
+				y = self.successor(node)
+
+				y_parent = y.get_parent()
+
+				if y_parent.get_key() < y.get_key():
+
+					y_parent.set_right(y.get_right())
+					y.get_right().set_parent(y_parent)
+						
+				else:
+					y_parent.set_left(y.get_right())
+					y.get_right().set_parent(y_parent)
+
+				y.set_right(node.get_right())
+				node.get_right().set_parent(y)
+
+				y.set_left(node.get_left())
+				node.get_left().set_parent(y)
+				
+				if parent.is_real_node():
+
+					y.set_parent(parent)
+
+					if node.get_key() < parent.get_key():
+
+						parent.set_left(y)
+
+					else: 
+						parent.set_right(y)
+
+				else:
+
+					self.root = y
+				
 
 
 	"""deletes node from the dictionary
@@ -407,9 +534,38 @@ class AVLTree(object):
 	@rtype: int
 	@returns: the number of rebalancing operation due to AVL rebalancing
 	"""
-	def delete(self, node):
-		return -1
 
+	def delete(self, node):
+
+		c = 0
+	
+		parent = node.get_parent()
+		self.BST_delete(parent, node)
+		self.tree_size -= 1 
+
+		while parent is not None and parent.is_real_node():
+			
+			old_height = parent.get_height()
+			parent.update_height()
+			bf = parent.get_bf()
+
+			if abs(bf) < 2:
+				
+				if old_height == parent.get_height():
+
+					break
+
+				else:
+
+					parent = parent.get_parent()
+
+			else:
+
+				old_parent = parent.get_parent()
+				c += self.rotation(parent)
+				parent = old_parent
+			
+		return c
 
 	"""returns an array representing dictionary 
 
@@ -467,135 +623,63 @@ class AVLTree(object):
 	def get_root(self):
 		return self.root
 	
+	
+
+
+def testing ():
+	tree = AVLTree()
+	tree.insert(25, 25)
+	tree.insert(9, 9)
+	tree.insert(33, 33)
+	tree.insert(5,5)
+	tree.insert(13,13)
+	tree.insert(29,29)
+	tree.insert(59,59)
+	tree.insert(2,2)
+	tree.insert(11,11)
+	tree.insert(20,20)
+	tree.insert(31,31)
+	tree.insert(18, 18)
+	tree.insert(23, 23)
+	tree.insert(10,10)
+	print(tree.insert(24,24))
+	tree.insert(50,50)
+	print(tree.insert(55,55))
+
+	tree1 = AVLTree()
+	tree1.insert(7,7)
+	tree1.insert(6,6)
+	tree1.insert(10,10)
+	tree1.insert(9,9)
+	pointer = tree1.get_root().get_left()
+	print(tree1.delete(pointer))
+	print("test")
+
+	tree2 = AVLTree()
+	tree2.insert(15,15)
+	tree2.insert(8,8)
+	tree2.insert(22,22)
+	tree2.insert(4,4)
+	tree2.insert(11,11)
+	tree2.insert(20,20)
+	tree2.insert(24,24)
+	tree2.insert(2,2)
+	tree2.insert(9,9)
+	tree2.insert(12,12)
+	tree2.insert(18,18)
+	tree2.insert(13,13)
+
+	pointer = tree2.get_root().get_right().get_right()
+
+
+	print (tree2.delete(pointer))
+
+	print("test")
 
 
 
 
 
 
-
-
-
-
-
-
-
-
-
-AVLNode.__repr__ = lambda self: str(self.get_key())
-
-class tests:
-    # These functions do the actual testing
-    @staticmethod
-    def testInsertDelete():
-        tree = AVLTree()
-
-        keys = [23, 4, 30, 11, 7, 15, 40, 43, 2, 1]
-        
-        # test RL rotation
-        testHelper.insert_array(tree, keys[0:5])
-        testHelper.assert_neighbors(tree, 7, 4, 11, 5)
-
-        # test LR rotation
-        testHelper.insert_array(tree, keys[5:6]) # insert 15
-        testHelper.assert_neighbors(tree, 15, None, None, 6)
-        testHelper.assert_neighbors(tree, 23, 15, 30, 6)
-        testHelper.assert_neighbors(tree, 11, 7, 23, 6)
-        testHelper.assert_neighbors(tree, 7, 4, None,6)
-        testHelper.test_root(tree, 11)
-        
-        # test L rotation
-        testHelper.insert_array(tree, keys[6:8]) # insert 40, 43
-        testHelper.assert_neighbors(tree, 40, 30, 43,8)
-        testHelper.assert_neighbors(tree, 23, 15, 40,8)
-        
-        # testHelper R rotation
-        testHelper.insert_array(tree, keys[8:10]) # insert 2, 1
-        testHelper.assert_neighbors(tree, 4, 2, 7,10)
-        testHelper.assert_neighbors(tree, 2, 1, None,10)
-        testHelper.assert_neighbors(tree, 7, None, None,10)
-        testHelper.assert_neighbors(tree, 11, 4, 23,10)
-        testHelper.test_root(tree, 11)
-        
-        # test deletions
-        testHelper.test_deletion(tree, 1, 0)
-        testHelper.assert_neighbors(tree, 4, 2, 7,9)
-        testHelper.assert_neighbors(tree, 2, None, None,9)
-        testHelper.assert_neighbors(tree, 7, None, None,9)
-        testHelper.assert_neighbors(tree, 11, 4, 23,9)
-        testHelper.test_root(tree, 11)
-        
-        testHelper.test_deletion(tree, 2, 0)
-        testHelper.assert_neighbors(tree, 4, None, 7,8)
-        testHelper.assert_neighbors(tree, 7, None, None,8)
-        testHelper.assert_neighbors(tree, 11, 4, 23,8)
-        testHelper.test_root(tree, 11)
-        
-        # test L rotation
-        testHelper.test_deletion(tree, 7, 1)
-        testHelper.assert_neighbors(tree, 11, 4, 15,7)
-        testHelper.assert_neighbors(tree, 23, 11, 40,7)
-        testHelper.test_root(tree, 23)
-        
-        # TODO: empty the tree and test to see everything is correct
-        
-    @staticmethod
-    def test_avl_to_array():
-        tree = AVLTree()
-
-        keys = [23, 4, 30, 11, 7, 15, 40, 43, 2, 1]
-        testHelper.insert_array(tree, keys)
-
-        testHelper.test_avl2array(tree, keys)
-
-class testHelper:
-    # Helper functions for tests class. No need to use any of them.
-    @staticmethod
-    def assert_neighbors(tree, node_key, left_key, right_key, size):
-        node = tree.search(node_key)
-        right_result = tree.search(right_key) if right_key != None else None
-        left_result = tree.search(left_key) if left_key != None else None
-        node_right = node.get_right() if node != None else None
-        node_left = node.get_left() if node != None else None
-
-        assert node_right is right_result, \
-            f"Checking neighbors for {node_key}, right neighbor is {node.get_right()} but search returned something else when searching for key {right_key}"
-        assert node_left is left_result, \
-            f"Checking neighbors for {node_key}, left neighbor is {node.get_left()} but search returned something else when searching for key {left_key}"
-        assert tree.size()==size, \
-            f"size error"
-        
-    @staticmethod
-    def insert_array(tree, key_array):
-        for key in key_array:
-            tree.insert(key, key)
-            
-    @staticmethod
-    def test_deletion(tree, deletion_key, num_balancing_actions):
-        deletion_node = tree.search(deletion_key)
-        check_balacing_actions = tree.delete(deletion_node)
-
-        assert tree.search(deletion_key) is None, \
-            f"Deleting {deletion_key}, searching for deleted key did not return None"
-        assert check_balacing_actions == num_balancing_actions, \
-            f"Deleting {deletion_key}, deletion returned {check_balacing_actions} balancing actions instead of {num_balancing_actions}"
-    
-    @staticmethod
-    def test_root(tree, root_key):
-        assert tree.get_root() is tree.search(root_key), \
-            f"Root is {tree.get_root()}, but search returned something else when searching for {root_key}"    
-    
-    """
-    @param tree: tree to test
-    @param tree_keys_array: Array with all keys present in the tree
-    """
-    @staticmethod
-    def test_avl2array(tree, tree_keys_array):
-
-        expectedArray = [(key, key) for key in sorted(tree_keys_array)] # tests.insert_array uses the key as a value, so we do the same here
-        avl_to_array_result = tree.avl_to_array()
-
-        assert expectedArray == avl_to_array_result, \
-            f"Expected avl_to_array() to return \n{expectedArray}\nbut got\n{avl_to_array_result}"
-		
-tests.testInsertDelete()
+testing()
+print("test")

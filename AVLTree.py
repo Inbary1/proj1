@@ -217,6 +217,10 @@ class AVLNode(object):
 		self.parent = None
 
 
+	def has_2_sons(self):
+		return self.get_left().is_real_node() and self.get_right().is_real_node()
+
+
 
 """
 A class implementing the ADT Dictionary, using an AVL tree.
@@ -587,11 +591,11 @@ class AVLTree(object):
 	def successor(self, x):
 
 		if x.get_right().is_real_node():
-			return min(x.get_right())
+			return AVLTree.min(x.get_right())
 		
 		y = x.get_parent()
 
-		while y.is_real_node() and x == y.get_right():
+		while y != None and x == y.get_right():
 
 			x = y 
 			y = x.get_parent()
@@ -616,7 +620,7 @@ class AVLTree(object):
 		# Case 1: Node is a leaf (has no children)
 		if node.is_real_node and node.is_leaf():
 				
-			if parent.is_real_node(): # Check if the node has a parent
+			if parent != None: # Check if the node has a parent
 
 				 # Remove the node as a child of its parent
 
@@ -631,9 +635,9 @@ class AVLTree(object):
 				self.root = AVLNode(None, None)
 
 		# Case 2: Node has only a right child
-		elif node.get_left().get_key() is None:  
+		elif not node.get_left().is_real_node():  
 				
-			if parent.is_real_node(): # Check if the node has a parent
+			if parent != None: # Check if the node has a parent
 
 				if node == parent.get_left(): # Check if the node is left son
 					parent.set_left(node.get_right())
@@ -650,9 +654,9 @@ class AVLTree(object):
 				node.get_right().make_root()
 	
 		# Case 3: Node has only a left child
-		elif node.get_right().get_key() is None: 
+		elif not node.get_right().is_real_node(): 
 					
-			if parent.is_real_node(): # Check if the node has a parent
+			if parent != None: # Check if the node has a parent
 
 				if node == parent.get_left(): # Check if the node is left son
 					parent.set_left(node.get_left())
@@ -676,25 +680,32 @@ class AVLTree(object):
 
 			# Update the parent of the successor's right child, y can't have left child
 
-			if y == y_parent.get_right(): # Checks if y is right son
+			if y == y_parent.get_left(): # Checks if y is left son
 
-				y_parent.set_right(y.get_right()) 
-				y.get_right().set_parent(y_parent)
-						
-			else: # Checks if y is left son
+				# Removes the seccesor from its place
 
-				y_parent.set_left(y.get_right())
+				y_parent.set_left(y.get_right()) 
 				y.get_right().set_parent(y_parent)
 
-			# Set the successor's children to be the node's children
+				# Sets node's children as the succesor's children
+
+				y.set_right(node.get_right())
+				node.get_right().set_parent(y)
+
+				y.set_left(node.get_left())
+				node.get_left().set_parent(y)
 				
-			y.set_right(node.get_right())
-			node.get_right().set_parent(y)
+			else: # y is right son and that means that y_parent = node
 
-			y.set_left(node.get_left())
-			node.get_left().set_parent(y)
+				# Sets node's left children as the succesor's left children
 
-			if parent.is_real_node(): # If the node has a parent, update the parent to point to the successor
+				y.set_left(node.get_left()) 
+				node.get_left().set_parent(y)
+
+			y.update_height() # Updates the height of the succesor
+			y_parent.update_height() # Updates the height of the succesor parent
+
+			if parent != None: # If the node has a parent, update the parent to point to the successor
 
 				y.set_parent(parent)
 
@@ -722,14 +733,21 @@ class AVLTree(object):
 	def delete(self, node):
 
 		c = 0
+		t = False
+
+		if node.has_2_sons(): # We will neet to update the height and balance factor of the successor's ancestors
+			successor_parent = self.successor(node).get_parent() #  Finds the parent of the node's successor
+			t = True
 	
 		parent = node.get_parent() # Finds the parent of node
 
 		# Perform Binary Search Tree (BST) deletion
 		self.BST_delete(parent, node) 
-
 		self.tree_size -= 1 
 
+		if t: 
+			parent = successor_parent.get_parent()
+		
 		while parent is not None:
 			
 			# Update height and balance factor of ancestors
@@ -1138,105 +1156,55 @@ class AVLTree(object):
 
 
 
+
 def testing ():
-	tree = AVLTree()
-	tree.insert(25, 25)
-	tree.insert(9, 9)
-	tree.insert(33, 33)
-	tree.insert(5,5)
-	tree.insert(13,13)
-	tree.insert(29,29)
-	tree.insert(59,59)
-	tree.insert(2,2)
-	tree.insert(11,11)
-	tree.insert(20,20)
-	tree.insert(31,31)
-	tree.insert(18, 18)
-	tree.insert(23, 23)
-	tree.insert(10,10)
-	print(tree.insert(24,24))
-	tree.insert(50,50)
-	print(tree.insert(55,55))
-	print(tree.avl_to_array())
 
-	tree1 = AVLTree()
-	tree1.insert(7,7)
-	tree1.insert(6,6)
-	tree1.insert(10,10)
-	tree1.insert(9,9)
-	print(tree1.avl_to_array())
-	pointer = tree1.get_root().get_left()
-	print(tree1.delete(pointer))
-	print("test")
 
-	tree2 = AVLTree()
-	tree2.insert(15,15)
-	tree2.insert(8,8)
-	tree2.insert(22,22)
-	tree2.insert(4,4)
-	tree2.insert(11,11)
-	tree2.insert(20,20)
-	tree2.insert(24,24)
-	tree2.insert(2,2)
-	tree2.insert(9,9)
-	tree2.insert(12,12)
-	tree2.insert(18,18)
-	tree2.insert(13,13)
-	print(tree2.avl_to_array())
+	def listToTree(list):
 
-	pointer = tree2.get_root().get_right().get_right()
+		tree = AVLTree()
 
-	print (tree2.delete(pointer))
 
-	tree3 = AVLTree()
-	tree3.insert(30,30)
-	tree3.insert(24,24)
-	tree3.insert(40,40)
-	tree3.insert(26,26)
-	tree3.insert(35,35)
-	tree3.insert(45,45)
-	print(" ")
+		for key in list:
+
+			tree.insert(key,key)
+
+		return tree
 
 
 
-	print(tree2.join(tree3, 23 ,23))
 
 
-	tree4 = AVLTree()
-	tree4.insert(8,8)
-	tree4.insert(4,4)
-	tree4.insert(9,9)
-	tree4.insert(2,2)
-	print(" ")
 
-	tree5 = AVLTree()
-	tree5.insert(23,23)
-	tree5.insert(15,15)
-	tree5.insert(30,30)
-	tree5.insert(12,12)
-	tree5.insert(20,20)
-	tree5.insert(24,24)
-	tree5.insert(40,40)
-	tree5.insert(13,13)
-	tree5.insert(18,18)
-	tree5.insert(22,22)
-	tree5.insert(25,25)
-	tree5.insert(26,26)
-	tree5.insert(38,38)
-	tree5.insert(42,42)
-	tree5.insert(41,41)
-	tree5.insert(45,45)
+	tree6 = AVLTree()
+	tree6.insert(5,5)
+	tree6.insert(4,4)
+	tree6.insert(7,7)
+	tree6.insert(6,6)
+	tree6.insert(8,8)
 
-	print(" ")
+	tree7 = listToTree([12,4,15,2,13,20])
 
-	node = tree5.get_root().get_right().get_left().get_right()
+	pointer = tree7.get_root().get_left()
 
-	list = tree5.split(node)
+	tree7.delete(pointer)
 
-	tree_left = list[0]
-	tree_right = list[1]
+	pointer = tree7.get_root()
+
+	tree7.delete(pointer)
+
+
+
+
+
+
 
 	print("test")
+
+
+
+
+
 
 
 

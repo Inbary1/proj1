@@ -746,7 +746,7 @@ class AVLTree(object):
 		self.tree_size -= 1 
 
 		if t: 
-			parent = successor_parent.get_parent()
+			parent = successor_parent
 		
 		while parent is not None:
 			
@@ -1172,34 +1172,17 @@ def testing ():
 		return tree
 
 
+	tree = listToTree([12,4,15,2,13,20])
 
+	pointer = tree.get_root().get_left()
 
+	tree.delete(pointer)
 
+	pointer = tree.get_root()
 
-	tree6 = AVLTree()
-	tree6.insert(5,5)
-	tree6.insert(4,4)
-	tree6.insert(7,7)
-	tree6.insert(6,6)
-	tree6.insert(8,8)
+	tree.delete(pointer)
 
-	tree7 = listToTree([12,4,15,2,13,20])
-
-	pointer = tree7.get_root().get_left()
-
-	tree7.delete(pointer)
-
-	pointer = tree7.get_root()
-
-	tree7.delete(pointer)
-
-
-
-
-
-
-
-	print("test")
+	print("done")
 
 
 

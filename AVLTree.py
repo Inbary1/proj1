@@ -184,6 +184,9 @@ class AVLNode(object):
 		new_height = 1 + max(self.get_left().get_height(), self.get_right().get_height())
 		self.set_height(new_height)
 
+	def make_root(self):
+		self.parent = None
+
 
 
 """
@@ -253,7 +256,7 @@ class AVLTree(object):
 
 	def BST_insert(self, parent, new_node):
 
-		if parent.is_real_node() == False:
+		if not parent.is_real_node():
 			self.root = new_node
 
 		else: 
@@ -362,14 +365,6 @@ class AVLTree(object):
 		return c
 
 				
-	def print_tree(root, level=0, prefix="Root: "):
-		if root is not None:
-			print(" " * (level * 4) + prefix + str(root.value))
-			if root.left is not None or root.right is not None:
-				AVLTree.print_tree(root.left, level + 1, "L--- ")
-				AVLTree.print_tree(root.right, level + 1, "R--- ")
-
-
 	"""inserts val at position i in the dictionary
 
 	@type key: int
@@ -457,7 +452,7 @@ class AVLTree(object):
 
 		else: 
 
-			if node.get_left().get_key() is None:  #only 1 right son
+			if node.get_left().get_key() is None:  # only 1 right son
 				
 				if parent.is_real_node():
 
@@ -543,7 +538,7 @@ class AVLTree(object):
 		self.BST_delete(parent, node)
 		self.tree_size -= 1 
 
-		while parent is not None and parent.is_real_node():
+		while parent is not None:
 			
 			old_height = parent.get_height()
 			parent.update_height()
@@ -572,9 +567,23 @@ class AVLTree(object):
 	@rtype: list
 	@returns: a sorted list according to key of touples (key, value) representing the data structure
 	"""
-	def avl_to_array(self):
-		return None
 
+	def avl_to_array_rec (self, node, array, i):
+
+		if node and node.is_real_node():
+			i = self.avl_to_array_rec(node.get_left(), array, i)
+			array[i] = (node.get_key(), node.get_value())
+			i += 1
+			i = self.avl_to_array_rec(node.get_right(), array, i)
+		
+		return i
+
+	def avl_to_array(self):
+
+		array = [None] * self.size()
+		self.avl_to_array_rec(self.root, array, 0)
+		return array
+	
 
 	"""returns the number of items in dictionary 
 
@@ -595,10 +604,55 @@ class AVLTree(object):
 	dictionary smaller than node.key, right is an AVLTree representing the keys in the 
 	dictionary larger than node.key.
 	"""
-	def split(self, node):
-		return None
 
+	def split(self, node):
+
+		x = node 
+
+		left_tree = AVLTree()
+
+		if x.get_left().is_real_node():
+			left_tree.root = x.get_left()
+			left_tree.get_root().make_root()
+
+		else:
+			left_tree.root = None
+
+
+		right_tree = AVLTree()
+
+		if x.get_right().is_real_node():
+			right_tree.root = x.get_right()
+			right_tree.get_root().make_root()
+		else:
+			right_tree.root = None
+		
+
+		parent = x.get_parent()
+
+		while parent is not None:
+
+			if parent.get_right() == x: # x is right son
+
+				left_son = AVLTree()
+				left_son.root = parent.get_left()
+				left_son.get_root().make_root()
+				left_tree.join(left_son, parent.get_key(), parent.get_value())
+
+			else: # x is left son
+
+				right_son = AVLTree()
+				right_son.root = parent.get_right()
+				right_son.get_root().make_root()
+				right_tree.join(right_son, parent.get_key(), parent.get_value())
+
+			x = parent
+			parent = parent.get_parent()
 	
+		return [left_tree, right_tree]
+
+
+
 	"""joins self with key and another AVLTree
 
 	@type tree2: AVLTree 
@@ -611,8 +665,156 @@ class AVLTree(object):
 	@rtype: int
 	@returns: the absolute value of the difference between the height of the AVL trees joined
 	"""
+
 	def join(self, tree2, key, val):
-		return None
+
+		if self.get_root() != None and tree2.get_root() != None:
+
+			if self.get_root().get_height() < tree2.get_root().get_height():
+
+				if self.get_root().get_key() < key:
+					return AVLTree.join_small_short(self, tree2, key, val)
+
+				else:
+					return AVLTree.join_big_short(self, tree2, key, val)
+
+			else:
+
+				if self.get_root().get_key() < key:	
+					return AVLTree.join_big_short(tree2, self, key, val)
+
+				else:
+					return AVLTree.join_small_short(tree2, self, key, val)
+				
+		elif self.get_root() == None: # self is empty tree
+
+			h = tree2.get_root().get_height()
+			tree2.insert(key, val)
+			self.root = tree2.get_root()
+			return h+1
+		
+		else: # tree2 is empty tree
+			
+			h = self.get_root().get_height()
+			self.insert(key, val)
+			tree2.root = self.get_root()
+			return h+1
+
+
+	def join_small_short(tree1, tree2, key, val): #tree 1 has smaller values and shorter
+
+		a = tree1.get_root()
+		b = tree2.get_root()
+
+		h = b.get_height() - a.get_height()
+
+		x = AVLNode.new_leaf(key, val)
+
+		i = 0
+
+		while i < h and b.get_left().is_real_node():
+			b = b.get_left()
+			i += 1
+
+		c = b.get_parent()
+
+		x.set_right(b)
+		x.set_left(a)
+
+		c.set_left(x)
+		x.set_parent(c)
+		x.set_height(a.get_height() + 1)
+		b.set_parent(x)
+		a.set_parent(x)
+
+		parent = c 
+		c = 0
+
+		while parent is not None and parent.is_real_node():
+			
+			old_height = parent.get_height()
+			parent.update_height()
+			bf = parent.get_bf()
+
+			if abs(bf) < 2:
+				
+				if old_height == parent.get_height():
+
+					break
+
+				else:
+
+					parent = parent.get_parent()
+
+			else:
+
+				old_parent = parent.get_parent()
+				c += tree2.rotation(parent)
+				parent = old_parent
+
+		tree1.root = tree2.get_root()
+		new_size = tree1.size() + tree2.size() +1
+		tree1.tree_size = new_size
+		tree2.tree_size = new_size
+		return h
+	
+
+	def join_big_short(tree1, tree2, key, val): #tree 1 has bigger values and shorter
+
+		a = tree1.get_root()
+		b = tree2.get_root()
+
+		h = b.get_height() - a.get_height()
+
+		x = AVLNode.new_leaf(key, val)
+
+		i = 0
+
+		while i < h and b.get_right().is_real_node():
+			b = b.get_right()
+			i += 1
+
+		c = b.get_parent()
+
+		x.set_right(a)
+		x.set_left(b)
+
+		c.set_right(x)
+		x.set_parent(c)
+		x.set_height(a.get_height() + 1)
+		b.set_parent(x)
+		a.set_parent(x)
+
+		parent = c 
+		c = 0
+
+		while parent is not None and parent.is_real_node():
+			
+			old_height = parent.get_height()
+			parent.update_height()
+			bf = parent.get_bf()
+
+			if abs(bf) < 2:
+				
+				if old_height == parent.get_height():
+
+					break
+
+				else:
+
+					parent = parent.get_parent()
+
+			else:
+
+				old_parent = parent.get_parent()
+				c += tree2.rotation(parent)
+				parent = old_parent
+
+		tree1.root = tree2.get_root()
+		new_size = tree1.size() + tree2.size() +1
+		tree1.tree_size = new_size
+		tree2.tree_size = new_size
+		return h
 
 
 	"""returns the root of the tree representing the dictionary
@@ -623,7 +825,8 @@ class AVLTree(object):
 	def get_root(self):
 		return self.root
 	
-	
+
+
 
 
 def testing ():
@@ -645,12 +848,14 @@ def testing ():
 	print(tree.insert(24,24))
 	tree.insert(50,50)
 	print(tree.insert(55,55))
+	print(tree.avl_to_array())
 
 	tree1 = AVLTree()
 	tree1.insert(7,7)
 	tree1.insert(6,6)
 	tree1.insert(10,10)
 	tree1.insert(9,9)
+	print(tree1.avl_to_array())
 	pointer = tree1.get_root().get_left()
 	print(tree1.delete(pointer))
 	print("test")
@@ -668,11 +873,59 @@ def testing ():
 	tree2.insert(12,12)
 	tree2.insert(18,18)
 	tree2.insert(13,13)
+	print(tree2.avl_to_array())
 
 	pointer = tree2.get_root().get_right().get_right()
 
-
 	print (tree2.delete(pointer))
+
+	tree3 = AVLTree()
+	tree3.insert(30,30)
+	tree3.insert(24,24)
+	tree3.insert(40,40)
+	tree3.insert(26,26)
+	tree3.insert(35,35)
+	tree3.insert(45,45)
+	print(" ")
+
+
+
+	print(tree2.join(tree3, 23 ,23))
+
+
+	tree4 = AVLTree()
+	tree4.insert(8,8)
+	tree4.insert(4,4)
+	tree4.insert(9,9)
+	tree4.insert(2,2)
+	print(" ")
+
+	tree5 = AVLTree()
+	tree5.insert(23,23)
+	tree5.insert(15,15)
+	tree5.insert(30,30)
+	tree5.insert(12,12)
+	tree5.insert(20,20)
+	tree5.insert(24,24)
+	tree5.insert(40,40)
+	tree5.insert(13,13)
+	tree5.insert(18,18)
+	tree5.insert(22,22)
+	tree5.insert(25,25)
+	tree5.insert(26,26)
+	tree5.insert(38,38)
+	tree5.insert(42,42)
+	tree5.insert(41,41)
+	tree5.insert(45,45)
+
+	print(" ")
+
+	node = tree5.get_root().get_right().get_left().get_right()
+
+	list = tree5.split(node)
+
+	tree_left = list[0]
+	tree_right = list[1]
 
 	print("test")
 

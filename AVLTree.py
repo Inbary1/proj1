@@ -354,8 +354,15 @@ class AVLTree(object):
 
 		 # Adjust the parent pointers
 		if B.get_parent() != None: 
+
 			A.set_parent(B.get_parent())
-			B.get_parent().set_right(A)
+
+			if B == B.get_parent().get_left(): # Checks if B is left child
+
+				B.get_parent().set_left(A)
+
+			else:
+				B.get_parent().set_right(A)
 
 		else:  # B is the root, set A as the new root 
 			self.root = A 
@@ -392,8 +399,14 @@ class AVLTree(object):
 
 		# Adjust the parent pointers
 		if B.get_parent() != None: 
+
 			A.set_parent(B.get_parent())
-			B.get_parent().set_left(A)
+
+			if B == B.get_parent().get_left(): # Checks if B is left child
+				B.get_parent().set_left(A)
+
+			else:
+				B.get_parent().set_right(A)
 
 
 		else:   # B is the root, set A as the new root
@@ -532,7 +545,7 @@ class AVLTree(object):
 		self.BST_insert(parent, new_node)
 		self.tree_size += 1 
 
-		# Check and perform rotations to maintain AVL property
+		# Check and perform rotations to smaintain AVL property
 		while parent is not None and parent.is_real_node():
 			
 			# Update height and balance factor of ancestors
@@ -759,7 +772,7 @@ class AVLTree(object):
 				
 				if old_height == parent.get_height(): # If the height hasn't changed, no further updates are needed
 					
-					break
+					parent = parent.get_parent()
 
 				else: # Move to the parent for further updates
 
@@ -792,7 +805,7 @@ class AVLTree(object):
 	
 	def avl_to_array_rec (self, node, array, i):
 
-		if node and node.is_real_node():
+		if node and node.is_real_node() and i < self.size() :
 
 			# Traverse left subtree
 			i = self.avl_to_array_rec(node.get_left(), array, i)
@@ -860,7 +873,7 @@ class AVLTree(object):
 			left_tree.get_root().make_root()
 
 		else: # Left subtree of the given node is empty
-			left_tree.root = None
+			left_tree.root = AVLNode(None, None)
 
 		# Populate right_tree with the right subtree of the given node.
 		if x.get_right().is_real_node():
@@ -868,7 +881,7 @@ class AVLTree(object):
 			right_tree.get_root().make_root()
 
 		else: # Right subtree of the given node is empty
-			right_tree.root = None
+			right_tree.root = AVLNode(None, None)
 		
 		# Traverse up the tree to split and reconstruct the trees.
 		parent = x.get_parent()
@@ -915,7 +928,7 @@ class AVLTree(object):
 
 	def join(self, tree2, key, val):
 
-		if self.get_root() != None and tree2.get_root() != None: # Both trees are not empty
+		if self.get_root().is_real_node() and tree2.get_root().is_real_node() : # Both trees are not empty
 
 			# self has smaller height
 			if self.get_root().get_height() < tree2.get_root().get_height(): 
@@ -929,7 +942,7 @@ class AVLTree(object):
 					return AVLTree.join_big_short(self, tree2, key, val)
 
 			# self has greater height
-			else: 
+			elif self.get_root().get_height() > tree2.get_root().get_height(): 
 
 				# self conatins the smaller keys
 				if self.get_root().get_key() < key:	
@@ -938,24 +951,47 @@ class AVLTree(object):
 				# self conatins the bigger keys
 				else:
 					return AVLTree.join_small_short(tree2, self, key, val)
+
+			# heights are equal	
+			else:
+
+				# self conatins the smaller keys
+				if self.get_root().get_key() < key:	
+					return AVLTree.join_equal_height(self, tree2, key, val)
+
+				# self conatins the bigger keys
+				else:
+					return AVLTree.join_equal_height(tree2, self, key, val)
+
 				
-		elif self.get_root() == None: # self is empty tree
+		elif tree2.get_root().is_real_node(): # only self is empty tree
 
 			# Adds the new node to tree2
 
 			h = tree2.get_root().get_height()
 			tree2.insert(key, val)
 			self.root = tree2.get_root()
-			return h+1
+			self.tree_size = tree2.tree_size
+			return h+2
 		
-		else: # tree2 is empty tree
+		elif self.get_root().is_real_node(): # only tree2 is empty tree
 
 			# Adds the new node to self
 			
-			h = self.get_root().get_height()
+			h = self.get_root().get_height() 
 			self.insert(key, val)
 			tree2.root = self.get_root()
-			return h+1
+			tree2.tree_size = self.tree_size
+			return h+2
+		
+		else: ## Both trees are empty
+
+			x = AVLNode.new_leaf(key, val)
+			self.root = x
+			tree2.root = x
+			self.tree_size = 1
+			tree2.tree_size = 1
+			return 1
 
 
 	"""Joins two AVL trees when tree1 has smaller values and is shorter.
@@ -972,7 +1008,7 @@ class AVLTree(object):
     @param val: The value to be associated with the key in the resulting AVL tree.
     @type val: Any
 
-    @return: The height difference between the two trees after the join operation.
+    @return: The height difference between the two trees + 1.
     @rtype: int
     """
 
@@ -999,8 +1035,10 @@ class AVLTree(object):
 		x.set_right(b)
 		x.set_left(a)
 
-		# Update the left child of the parent of b to x
-		c.set_left(x)
+		if c != None: # b is not root
+
+			# Update the left child of the parent of b to x
+			c.set_left(x)
 
 		# Set the parent of x
 		x.set_parent(c)
@@ -1047,7 +1085,7 @@ class AVLTree(object):
 		tree1.tree_size = new_size
 		tree2.tree_size = new_size
 
-		return h
+		return h+1
 	
 
 	"""Joins two AVL trees when tree1 has larger values and is shorter.
@@ -1064,7 +1102,7 @@ class AVLTree(object):
     @param val: The value to be associated with the key in the resulting AVL tree.
     @type val: Any
 
-    @return: The height difference between the two trees after the join operation.
+    @return: The height difference between the two trees + 1.
     @rtype: int
     """
 
@@ -1093,8 +1131,10 @@ class AVLTree(object):
 		# Set the left child of the new node x
 		x.set_left(b)
 
-		# Update the right child of the parent of b to x
-		c.set_right(x)
+		if c != None: # b is not root
+
+			# Update the right child of the parent of b to x
+			c.set_right(x)
 
 		# Set the parent of x
 		x.set_parent(c)
@@ -1141,7 +1181,57 @@ class AVLTree(object):
 		tree1.tree_size = new_size
 		tree2.tree_size = new_size
 
-		return h
+		return h+1
+	
+
+	"""
+    Joins two AVL trees when both trees have equal heights. Assumes that tree_small
+    has smaller keys compared to tree_big.
+
+    @param tree_small: The AVL tree with smaller keys to be joined.
+    @type tree_small: AVLTree
+
+    @param tree_big: The AVL tree with larger keys to be joined.
+    @type tree_big: AVLTree
+
+    @param key: The key to be inserted into the resulting AVL tree.
+    @type key: Any
+
+    @param val: The value to be associated with the key in the resulting AVL tree.
+    @type val: Any
+
+    @return: The height difference between the two trees + 1.
+    @rtype: int
+    """	
+	
+	def join_equal_height(tree_small, tree_big, key, val):
+
+		a = tree_small.get_root()
+		b = tree_big.get_root()
+
+		# Creates new node
+		x = AVLNode.new_leaf(key, val)
+
+		# Sets a and b as x's children
+
+		x.set_left(a)
+		x.set_right(b)
+		a.set_parent(x)
+		b.set_parent(x)
+
+		# Set the height of x
+		x.set_height(a.get_height() + 1)
+
+		# Set the root of tree1 and tree2 to x
+		tree_small.root = x
+		tree_big.root = x
+
+		# Update the size of the trees
+		new_size = tree_small.size() + tree_big.size() +1
+		tree_small.tree_size = new_size
+		tree_big.tree_size = new_size
+
+		return 1
 
 
 	"""returns the root of the tree representing the dictionary
@@ -1154,45 +1244,3 @@ class AVLTree(object):
 		return self.root
 	
 
-
-
-
-def testing ():
-
-
-	def listToTree(list):
-
-		tree = AVLTree()
-
-
-		for key in list:
-
-			tree.insert(key,key)
-
-		return tree
-
-
-	tree = listToTree([12,4,15,2,13,20])
-
-	pointer = tree.get_root().get_left()
-
-	tree.delete(pointer)
-
-	pointer = tree.get_root()
-
-	tree.delete(pointer)
-
-	print("done")
-
-
-
-
-
-
-
-
-
-
-
-testing()
-print("test")

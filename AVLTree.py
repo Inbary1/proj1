@@ -217,6 +217,12 @@ class AVLNode(object):
 		self.parent = None
 
 
+	"""Checks if the current node has two children
+
+    @rtype: bool
+	@returns: True if the node has two children, False otherwise.
+    """
+
 	def has_2_sons(self):
 		return self.get_left().is_real_node() and self.get_right().is_real_node()
 

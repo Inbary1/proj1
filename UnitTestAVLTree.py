@@ -222,7 +222,7 @@ class TestAVLTree(unittest.TestCase):
         self.assertEqual(avl_tree.root.get_left().get_right().get_value(), "12")
         self.assertEqual(avl_tree.root.get_right().get_right().get_value(), "24")
         self.assertEqual(avl_tree.root.get_left().get_right().get_right().get_value(), "13")
-        self.assertEqual(ans, 2)
+        self.assertEqual(ans, 3)
 
 
 

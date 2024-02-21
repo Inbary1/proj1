@@ -716,13 +716,17 @@ class AVLTree(object):
 				
 			else: # y is right son and that means that y_parent = node
 
+				# Sets y's right children as the y's left children
+
+				y.set_right(y.get_right())
+				y.get_right().set_parent(y)
+
 				# Sets node's left children as the succesor's left children
 
-				y.set_left(node.get_left()) 
+				y.set_left(node.get_left())
 				node.get_left().set_parent(y)
 
-			y.update_height() # Updates the height of the succesor
-			y_parent.update_height() # Updates the height of the succesor parent
+			y.set_height(node.get_height()) # Updates the height of the succesor
 
 			if parent != None: # If the node has a parent, update the parent to point to the successor
 
@@ -754,9 +758,9 @@ class AVLTree(object):
 		c = 0
 		t = False
 
-		if node.has_2_sons(): # We will neet to update the height and balance factor of the successor's ancestors
-			successor_parent = self.successor(node).get_parent() #  Finds the parent of the node's successor
-			t = True
+		if node.has_2_sons(): # We will neet to update the height and balance factor from the successor
+			successor = self.successor(node) #  Finds the node's successor
+			t = True 
 	
 		parent = node.get_parent() # Finds the parent of node
 
@@ -764,8 +768,8 @@ class AVLTree(object):
 		self.BST_delete(parent, node) 
 		self.tree_size -= 1 
 
-		if t: 
-			parent = successor_parent
+		if t: # if we switched the deleted node with the succesor 
+			parent = successor
 		
 		while parent is not None:
 			
@@ -1239,5 +1243,8 @@ class AVLTree(object):
 
 	def get_root(self):
 		return self.root
+	
+
+
 	
 

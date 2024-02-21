@@ -801,31 +801,22 @@ class AVLTree(object):
 
     @param array: The array to store the key-value pairs.
     @type array: list
-
-    @param i: The index to insert the current key-value pair in the array.
-    @type i: int
-
-    @return: The updated index for the next insertion in the array.
-    @rtype: int
     """
 	
-	def avl_to_array_rec (self, node, array, i):
+	def avl_to_array_rec (self, node, array):
 
-		if node and node.is_real_node() and i < self.size() :
+		if node.is_real_node():
 
 			# Traverse left subtree
-			i = self.avl_to_array_rec(node.get_left(), array, i)
+			self.avl_to_array_rec(node.get_left(), array)
 
 			# Insert current node's key-value pair into the array
-			array[i] = (node.get_key(), node.get_value())
-			i += 1
-
+			array.append((node.get_key(), node.get_value()))
+			
 			# Traverse right subtree
-			i = self.avl_to_array_rec(node.get_right(), array, i)
+			self.avl_to_array_rec(node.get_right(), array)
 		
-		return i
 
-	
 	"""returns an array representing dictionary 
 
 	@rtype: list
@@ -835,10 +826,10 @@ class AVLTree(object):
 	def avl_to_array(self):
 
 		# Create an empty array to store key-value pairs.
-		array = [None] * self.size() 
+		array = []
 
 		# Recursively populate the array with key-value pairs.
-		self.avl_to_array_rec(self.root, array, 0)
+		self.avl_to_array_rec(self.root, array)
 
 		# Return the sorted array representing the AVL tree.
 		return array

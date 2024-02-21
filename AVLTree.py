@@ -11,6 +11,7 @@
 
 class AVLNode(object):
 	"""Constructor, you are allowed to add more fields. 
+	
 
 	@type key: int or None
 	@type value: any
@@ -29,6 +30,8 @@ class AVLNode(object):
 	"""returns the left child
 	@rtype: AVLNode
 	@returns: the left child of self, None if there is no left child (if self is virtual)
+
+	Time Complexity: O(1)
 	"""
 	def get_left(self):
 
@@ -39,6 +42,8 @@ class AVLNode(object):
 
 	@rtype: AVLNode
 	@returns: the right child of self, None if there is no right child (if self is virtual)
+
+	Time Complexity: O(1)
 	"""
 	def get_right(self):
 
@@ -49,6 +54,8 @@ class AVLNode(object):
 
 	@rtype: AVLNode
 	@returns: the parent of self, None if there is no parent
+
+	Time Complexity: O(1)
 	"""
 	def get_parent(self):
 		return self.parent
@@ -58,6 +65,8 @@ class AVLNode(object):
 
 	@rtype: int or None
 	@returns: the key of self, None if the node is virtual
+
+	Time Complexity: O(1)
 	"""
 	def get_key(self):
 		return self.key
@@ -67,6 +76,8 @@ class AVLNode(object):
 
 	@rtype: any
 	@returns: the value of self, None if the node is virtual
+
+	Time Complexity: O(1)
 	"""
 	def get_value(self):
 		return self.value
@@ -76,6 +87,8 @@ class AVLNode(object):
 
 	@rtype: int
 	@returns: the height of self, -1 if the node is virtual
+
+	Time Complexity: O(1)
 	"""
 	def get_height(self):
 		return self.height
@@ -85,6 +98,8 @@ class AVLNode(object):
 
 	@rtype: int
 	@returns: the bf of self
+
+	Time Complexity: O(1)
 	"""
 
 	def get_bf(self):
@@ -99,6 +114,8 @@ class AVLNode(object):
 
 	@type node: AVLNode
 	@param node: a node
+
+	Time Complexity: O(1)
 	"""
 
 	def set_left(self, node):
@@ -109,7 +126,10 @@ class AVLNode(object):
 
 	@type node: AVLNode
 	@param node: a node
+
+	Time Complexity: O(1)
 	"""
+
 	def set_right(self, node):
 		self.right = node
 
@@ -118,7 +138,10 @@ class AVLNode(object):
 
 	@type node: AVLNode
 	@param node: a node
+
+	Time Complexity: O(1)
 	"""
+
 	def set_parent(self, node):
 		self.parent = node
 
@@ -127,7 +150,10 @@ class AVLNode(object):
 
 	@type key: int or None
 	@param key: key
+
+	Time Complexity: O(1)
 	"""
+
 	def set_key(self, key):
 		self.key = key
 
@@ -136,7 +162,10 @@ class AVLNode(object):
 
 	@type value: any
 	@param value: data
+
+	Time Complexity: O(1)
 	"""
+
 	def set_value(self, value):
 		self.value = value
 
@@ -145,7 +174,10 @@ class AVLNode(object):
 
 	@type h: int
 	@param h: the height
+
+	Time Complexity: O(1)
 	"""
+
 	def set_height(self, h):
 		self.height = h
 
@@ -154,7 +186,10 @@ class AVLNode(object):
 
 	@rtype: bool
 	@returns: False if self is a virtual node, True otherwise.
+
+	Time Complexity: O(1)
 	"""
+
 	def is_real_node(self):
 
 		return self.key is not None
@@ -169,6 +204,8 @@ class AVLNode(object):
 
     @rtype: AVLNode
     @returns: A new leaf node with the specified key, value, and virtual children.
+
+	Time Complexity: O(1)
     """
 
 	def new_leaf(key, value):
@@ -192,6 +229,8 @@ class AVLNode(object):
 
     @rtype: bool
     @returns: True if the node is a leaf, False otherwise.
+
+	Time Complexity: O(1)
     """
 
 	def is_leaf(self):
@@ -206,6 +245,8 @@ class AVLNode(object):
 	"""Updates the height of the current node based on the heights of its left and right children.
 
     @rtype: None
+
+	Time Complexity: O(1)
     """
 
 	def update_height(self):
@@ -218,6 +259,8 @@ class AVLNode(object):
 	"""Sets the parent of the current node to None, making it the root of the subtree.
 
     @rtype: None
+
+	Time Complexity: O(1)
     """
 
 	def make_root(self):
@@ -228,6 +271,8 @@ class AVLNode(object):
 
     @rtype: bool
 	@returns: True if the node has two children, False otherwise.
+
+	Time Complexity: O(1)
     """
 
 	def has_2_sons(self):
@@ -258,8 +303,9 @@ class AVLTree(object):
 	@param key: a key to be searched
 	@rtype: AVLNode
 	@returns: the AVLNode corresponding to key or None if key is not found.
-	"""
 
+	Time Complexity: O(log(n))
+	"""
 
 	def search(self, key):
 		
@@ -292,6 +338,8 @@ class AVLTree(object):
 
     @rtype: AVLNode
     @returns: The parent node where the new node should be inserted.
+
+	Time Complexity: O(log(n))
     """
 	
 	def find_parent(self, new_node):
@@ -325,6 +373,8 @@ class AVLTree(object):
     @param new_node: The new node to be inserted.
 
     @rtype: None
+
+	Time Complexity: O(1)
     """
 
 	def BST_insert(self, parent, new_node):
@@ -354,6 +404,8 @@ class AVLTree(object):
     @param B: The pivot node for the right rotation.
 
     @rtype: None
+
+	Time Complexity: O(1)
     """
 
 	def right_rotation(self,B):
@@ -400,6 +452,8 @@ class AVLTree(object):
     @param B: The pivot node for the left rotation.
 
     @rtype: None
+
+	Time Complexity: O(1)
     """
 
 	def left_rotation(self, B):
@@ -447,6 +501,8 @@ class AVLTree(object):
     @param C: The pivot node for the left-right rotation.
 
     @rtype: None
+
+	Time Complexity: O(1)
     """
 
 	def left_right_rotation(self, C):
@@ -470,6 +526,8 @@ class AVLTree(object):
     @param C: The pivot node for the right-left rotation.
 
     @rtype: None
+
+	Time Complexity: O(1)
     """
 
 	def right_left_rotation(self, C):
@@ -495,6 +553,7 @@ class AVLTree(object):
     @rtype: int
     @returns: The number of rotations performed (c).
 
+	Time Complexity: O(1)
     """
 
 	def rotation(self, node):
@@ -545,6 +604,8 @@ class AVLTree(object):
 
 	@rtype: int
 	@returns: the number of rebalancing operation due to AVL rebalancing
+
+	Time Complexity: O(log(n))
 	"""
 
 	def insert(self, key, val):
@@ -598,6 +659,8 @@ class AVLTree(object):
 
     @rtype: AVLNode
     @returns: The node with the smallest key in the subtree rooted at node x.
+
+	Time Complexity: O(log(n))
 	"""
 
 	def min(x):
@@ -615,6 +678,8 @@ class AVLTree(object):
 
     @rtype: AVLNode or None
     @returns: The node that follows x in an in-order traversal, or None if x is the maximum node.
+
+	Time Complexity: O(log(n))
     """
 
 	def successor(self, x):
@@ -642,6 +707,8 @@ class AVLTree(object):
 
     @rtype: None
     @returns: Modifies the AVL tree by removing the specified node and adjusting its parent accordingly.
+
+	Time Complexity: O(log(n))
     """
 
 	def BST_delete(self, parent, node):
@@ -761,6 +828,8 @@ class AVLTree(object):
 	@pre: node is a real pointer to a node in self
 	@rtype: int
 	@returns: the number of rebalancing operation due to AVL rebalancing
+
+	Time Complexity: O(log(n))
 	"""
 
 	def delete(self, node):
@@ -815,6 +884,9 @@ class AVLTree(object):
 
     @param array: The array to store the key-value pairs.
     @type array: list
+
+	Time Complexity: O(n)
+
     """
 	
 	def avl_to_array_rec (self, node, array):
@@ -835,6 +907,8 @@ class AVLTree(object):
 
 	@rtype: list
 	@returns: a sorted list according to key of touples (key, value) representing the data structure
+
+	Time Complexity: O(n)
 	"""
 
 	def avl_to_array(self):
@@ -853,6 +927,8 @@ class AVLTree(object):
 
 	@rtype: int
 	@returns: the number of items in dictionary 
+
+	Time Complexity: O(1)
 	"""
 
 	def size(self):
@@ -868,6 +944,8 @@ class AVLTree(object):
 	@returns: a list [left, right], where left is an AVLTree representing the keys in the 
 	dictionary smaller than node.key, right is an AVLTree representing the keys in the 
 	dictionary larger than node.key.
+
+	Time Complexity: O(log(n))
 	"""
 
 	def split(self, node):
@@ -935,6 +1013,8 @@ class AVLTree(object):
 	@pre: all keys in self are smaller than key and all keys in tree2 are larger than key
 	@rtype: int
 	@returns: the absolute value of the difference between the height of the AVL trees joined
+
+	Time Complexity: O(log(n))
 	"""
 
 	def join(self, tree2, key, val):
@@ -1021,6 +1101,8 @@ class AVLTree(object):
 
     @return: The height difference between the two trees + 1.
     @rtype: int
+
+	Time Complexity: O(log(n))
     """
 
 	def join_small_short(tree1, tree2, key, val):
@@ -1115,6 +1197,8 @@ class AVLTree(object):
 
     @return: The height difference between the two trees + 1.
     @rtype: int
+
+	Time Complexity: O(log(n))
     """
 
 	def join_big_short(tree1, tree2, key, val): 
@@ -1213,6 +1297,8 @@ class AVLTree(object):
 
     @return: The height difference between the two trees + 1.
     @rtype: int
+
+	Time Complexity: O(1)
     """	
 	
 	def join_equal_height(tree_small, tree_big, key, val):
@@ -1249,6 +1335,8 @@ class AVLTree(object):
 
 	@rtype: AVLNode
 	@returns: the root, None if the dictionary is empty
+
+	Time Complexity: O(1)
 	"""
 
 	def get_root(self):

@@ -88,7 +88,11 @@ class AVLNode(object):
 	"""
 
 	def get_bf(self):
-		return (self.get_left().get_height() - self.get_right().get_height())
+
+		if self.is_real_node():
+			return (self.get_left().get_height() - self.get_right().get_height())
+		
+		return 0 
 		
 
 	"""sets left child
@@ -96,6 +100,7 @@ class AVLNode(object):
 	@type node: AVLNode
 	@param node: a node
 	"""
+
 	def set_left(self, node):
 		self.left = node
 
@@ -204,8 +209,10 @@ class AVLNode(object):
     """
 
 	def update_height(self):
-		new_height = 1 + max(self.get_left().get_height(), self.get_right().get_height())
-		self.set_height(new_height)
+
+		if self.is_real_node():
+			new_height = 1 + max(self.get_left().get_height(), self.get_right().get_height())
+			self.set_height(new_height)
 
 
 	"""Sets the parent of the current node to None, making it the root of the subtree.
@@ -376,10 +383,11 @@ class AVLTree(object):
 
     	# Set B as the left child of A and update the parent pointers
 		B.set_parent(A)
-		B.set_left(AR)
 
 		# Update the parent pointer of AR
-		AR.set_parent(B)
+		if not AR == None:
+			B.set_left(AR)
+			AR.set_parent(B)
 		
 		# Update the heights of B and A
 		B.update_height()
@@ -421,10 +429,12 @@ class AVLTree(object):
 
 		# Set B as the right child of A and update the parent pointers
 		B.set_parent(A)
-		B.set_right(AL)
 
 		# Update the parent pointer of AL
-		AL.set_parent(B)
+
+		if not AL == None:
+			B.set_right(AL)
+			AL.set_parent(B)
 
 		# Update the heights of B and A
 		B.update_height()
@@ -1244,7 +1254,3 @@ class AVLTree(object):
 	def get_root(self):
 		return self.root
 	
-
-
-	
-
